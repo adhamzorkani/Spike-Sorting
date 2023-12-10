@@ -78,6 +78,7 @@ for i, electrode_data in enumerate(electrodes_data):
     X = np.array(list(zip(spike_indices, [electrode_data[index] for index in spike_indices])))
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     cluster_labels = kmeans.fit_predict(X)
+    # print(cluster_labels)
 
     # Plot raw data
     axes[0][i].plot(electrode_data[:samples_to_consider], label=f'Electrode {i + 1} Raw Data')
