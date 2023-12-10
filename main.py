@@ -94,16 +94,4 @@ plt.scatter(
     electrode2_DF["standard deviation"], electrode2_DF["difference"], c=kmeans2.labels_
 )
 
-# fig, ax = plt.subplots()
-# plt.plot(electrode1_DF["standard deviation"], electrode1_DF["difference"], "*")
-# ax.set_title("Electrode 1 Neuron clusters")
-# ax.set_xlabel("standard deviation")
-# ax.set_ylabel("Mean")
-
-# fig, ax = plt.subplots()
-# plt.plot(electrode2_DF["standard deviation"], electrode2_DF["difference"], "*")
-# ax.set_title("Electrode 2 Neuron clusters")
-# ax.set_xlabel("standard deviation")
-# ax.set_ylabel("Mean")
-
 plt.show()
