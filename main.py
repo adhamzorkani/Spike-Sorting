@@ -1,108 +1,88 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
 from scipy.signal import find_peaks
+from sklearn.cluster import KMeans
 
-sampling_rate = 24414
-window_duration = 2e-3
-window_size = int(window_duration * sampling_rate)
-max_peaks_to_plot = 20
-samples_to_consider = 20000
-num_clusters = 3  # Gotten by the elbow method
+class SpikeSorting:
+    def __init__(self, sampling_rate, window_size, th_mult, peaks_num):
+        self.sampling_rate = sampling_rate
+        self.window_size = window_size
+        self.th_mult = th_mult
+        self.peaks_num = peaks_num
 
-def get_features(list):
-    data = []
-    threshold = 3.5 * np.std(list[:499])
+    def spike_sorting(self, data_raw, which_electrode=1):
+        # Initial declarations
+        electrode_d = data_raw[:, 0]
+        threshold = self.th_mult * np.std(electrode_d[:500])
+        peaks, _ = find_peaks(electrode_d, height=threshold, distance=int(self.sampling_rate*self.window_size))
 
-    for index, element in enumerate(list):
-        if element > threshold:
-            maximum = element
-            max_index = index
-            for j in range(index, len(list)):
-                if list[j] > threshold:
-                    if list[j] > maximum:
-                        maximum = list[j]
-                        max_index = j
-                else:
-                    break
+        timestamps_a = []
+        spikes_means = []
+        features_exp = []
+        clusters_ident = []
+        spikes_organized = []
+        spike_features = []
+        
+        for peak in peaks:
+            start, end = int(peak - (self.sampling_rate * self.window_size) / 2), int(peak + (self.sampling_rate * self.window_size) / 2)
+            spike = electrode_d[start:end]
+            spikes_organized.append(spike)
+        
+        for spike in spikes_organized:
+            std_dev, max_diff = np.std(spike), np.max(np.abs(np.diff(spike)))
+            spike_features.append([std_dev, max_diff])
+        
+        kmeans = KMeans(n_clusters=3, n_init=100, max_iter=100, tol=1e-6, random_state=0)
+        clusters = kmeans.fit_predict(spike_features)
+        
+        timestamps_a.append(peaks / self.sampling_rate)
+        spikes_means.append(np.mean(spikes_organized, axis=0))
+        features_exp.extend(spike_features)
+        clusters_ident.extend(clusters)
 
-            start_index = int(max(0, max_index - window_size // 2))
-            end_index = int(min(len(list), max_index + window_size // 2))
+        self.plot_spike_data(electrode_d, peaks, clusters, which_electrode)
 
-            window_list = list[start_index:end_index]
-            std = np.std(window_list)
-            diff = np.max(np.abs(np.diff(window_list)))
+        return timestamps_a, spikes_means, features_exp, clusters_ident
 
-            data.append(
-                {"standard deviation": std, "difference": diff, "peakIndex": max_index}
-            )
-    dataDF = pd.DataFrame(data)
-    return dataDF
+    def plot_spike_data(self, electrode_d, peaks, clusters, which_electrode=1):
+        plt.figure(figsize=(10, 6))
+        plt.plot(electrode_d[:20000], label='Raw Data')
 
-def spike_sorting(data):
-    threshold = 3.5 * np.std(data[:499])
-    spike_indices, _ = find_peaks(data[:samples_to_consider], height=threshold)
+        for i, (peak, cluster) in enumerate(zip(peaks[:self.peaks_num], clusters[:self.peaks_num])):
+            plt.plot(peak, electrode_d[peak], 'b*' if cluster == 0 else 'g*' if cluster == 1 else 'r*')
 
-    # Sort spike indices by peak amplitude in descending order
-    sorted_spike_indices = sorted(spike_indices, key=lambda index: data[index], reverse=True)
+        plt.xlabel('Sample ID')
+        plt.ylabel('Amplitude')
+        plt.legend()
+        plt.title(f'Electrode {which_electrode} | Raw Data with Spikes Clustered')
+        plt.show()
 
-    selected_spike_indices = sorted_spike_indices[:max_peaks_to_plot]
+    def plot_spike_means(self, spikes_means, electrode_number):
+        for i, mean_spike in enumerate(spikes_means):
+            plt.figure(figsize=(10, 4))
+            plt.plot(mean_spike, label=f'Neuron {i + 1}')
+            plt.xlabel('Sample Index')
+            plt.ylabel('Amplitude')
+            plt.legend()
+            plt.title(f'Average Spike Neuron {i + 1} Electrode {electrode_number}')
+            plt.show()
 
-    spikes = []
-    for index in selected_spike_indices:
-        start_index = int(max(0, index - window_size // 2))
-        end_index = int(min(len(data), index + window_size // 2))
-        spike_waveform = data[start_index:end_index]
-        spikes.append(spike_waveform)
+    def plot_spike_features(self, features_exp, clusters_ident, electrode_number):
+        plt.figure(figsize=(10, 6))
+        scatter = plt.scatter(np.array(features_exp)[:, 0], np.array(features_exp)[:, 1], c=clusters_ident, cmap='viridis', marker='o', s=20)
+        plt.xlabel('Standard Deviation')
+        plt.ylabel('Maximum Difference')
+        plt.title(f'Spike Features Colored by Clusters - Electrode {electrode_number}')
+        plt.legend(*scatter.legend_elements(), loc='upper right', title='Clusters')
+        plt.show()
 
-    return selected_spike_indices, spikes
-
-electrode1 = []
-electrode2 = []
-
-with open("Data.txt", "r") as file:
-    for line in file:
-        data = line.strip().split("\t")
-
-        electrode1.append(float(data[0]))
-        electrode2.append(float(data[1]))
-
-electrodes_data = [electrode1, electrode2]
-fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 8))
-
-for i, electrode_data in enumerate(electrodes_data):
-    spike_indices, _ = spike_sorting(electrode_data)
-
-    # Perform KMeans clustering on the spike indices
-    X = np.array(list(zip(spike_indices, [electrode_data[index] for index in spike_indices])))
-    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-    cluster_labels = kmeans.fit_predict(X)
-    # print(cluster_labels)
-
-    # Plot raw data
-    axes[0][i].plot(electrode_data[:samples_to_consider], label=f'Electrode {i + 1} Raw Data')
-
-    # Plot the peaks with different colors for each cluster
-    for cluster_id in range(num_clusters):
-        cluster_indices = np.where(cluster_labels == cluster_id)[0]
-        axes[0][i].plot(X[cluster_indices, 0], X[cluster_indices, 1], '*', markersize=10, label=f'Cluster {cluster_id + 1}')
-
-    axes[0][i].set_xlabel('Sample')
-    axes[0][i].set_ylabel('Amplitude')
-    axes[0][i].legend()
-    axes[0][i].set_title(f'Electrode {i + 1} Raw Data with Clusters')
-
-
-for i in range(2):
-    electrode_DF = get_features(electrodes_data[i])
-    data = list(zip(electrode_DF["standard deviation"], electrode_DF["difference"]))
-    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-    kmeans.fit(data)
-    axes[1][i].scatter(electrode_DF["standard deviation"], electrode_DF["difference"], c=kmeans.labels_)
-    axes[1][i].set_xlabel('Standard Deviation')
-    axes[1][i].set_ylabel('Difference')
-    axes[1][i].set_title(f'Electrode {i + 1} Scatter Plot with Clusters')
-
-plt.tight_layout()
-plt.show()
+spike_sorter = SpikeSorting(sampling_rate=24414, window_size=2e-3, th_mult=3.5, peaks_num=20)
+data_raw = np.loadtxt("Data.txt")
+timestamps_1, means_1, features_1, clusters_1 = spike_sorter.spike_sorting(data_raw[:, :1])
+spike_sorter.plot_spike_features(features_1, clusters_1, 1)
+spike_sorter.plot_spike_means(means_1, 1)
+spike_sorter_2 = SpikeSorting(sampling_rate=24414, window_size=2e-3, th_mult=3.5, peaks_num=10)
+timestamps_2, means_2, features_2, clusters_2 = spike_sorter_2.spike_sorting(data_raw[:, 1:], 2)
+spike_sorter_2.plot_spike_features(features_2, clusters_2, 2)
+spike_sorter_2.plot_spike_means(means_2, 2)
