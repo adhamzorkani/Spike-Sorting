@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 sampling_rate = 24414
 window_duration = 2e-3
@@ -52,3 +53,19 @@ mean_spikes_df = pd.DataFrame(mean_spikes)
 
 spike_timestamps_df.transpose().to_csv("spike_timestamps.csv", index=False)
 mean_spikes_df.transpose().to_csv("mean_spikes.csv", index=False)
+
+fig, ax = plt.subplots()
+for timestamps in spike_timestamps:
+    ax.plot(timestamps, np.zeros_like(timestamps), 'x')
+ax.set_title('Spike Timestamps')
+ax.set_xlabel('Time (s)')
+
+# Plot mean spikes
+fig, ax = plt.subplots()
+for mean_spike in mean_spikes:
+    ax.plot(mean_spike)
+ax.set_title('Mean Spikes')
+ax.set_xlabel('Sample')
+ax.set_ylabel('Voltage')
+
+plt.show()
