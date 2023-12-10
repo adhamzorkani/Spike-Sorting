@@ -18,15 +18,15 @@ This project, conducted as a part of CSCE 363/3611 at The American University in
 
 ### Data Preprocessing
 
-The raw neural data from "Data.txt" was preprocessed by loading it into two separate lists, `electrode1` and `electrode2`. This step was essential to handle the data from each electrode independently.
+The raw neural data from "Data.txt" was preprocessed by loading it into a 2D array called data_raw. This step was essential to handle the data from each electrode independently.
 
 ### Feature Extraction
 
-Feature extraction was carried out on the identified spikes. The criteria for spike detection involved a threshold set based on the standard deviation of the data. For each spike, features such as the standard deviation, the difference between successive samples, and the peak index were extracted. This data was organized into two data frames, `electrode1_DF` and `electrode2_DF`.
+Feature extraction was carried out on the identified spikes. The criteria for spike detection involved a threshold set based on the standard deviation of the data. For each spike, features such as the standard deviation, the difference between successive samples, and the peak index were extracted.
 
 ### Clustering
 
-The K-means clustering algorithm was employed to classify the spikes. The number of clusters was predetermined using the elbow method, and clustering was executed using the `KMeans` class from the scikit-learn library.
+The K-means clustering algorithm was employed to classify the spikes. The number of clusters was predetermined using the elbow method, and clustering was executed using the `KMeans` class from the scikit-learn library. The K value was decided based on the elbow method, where we choose the number of clusters based on where the elbow of the graph is located.
 
 ## How To Run
 
