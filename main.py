@@ -67,6 +67,7 @@ data1 = list(zip(electrode1_DF["standard deviation"], electrode1_DF["difference"
 kmeans1 = KMeans(n_clusters=3)
 kmeans1.fit(data1)
 
+fig, ax = plt.subplots()
 plt.scatter(
     electrode1_DF["standard deviation"], electrode1_DF["difference"], c=kmeans1.labels_
 )
@@ -75,12 +76,12 @@ plt.scatter(
 data2 = list(zip(electrode2_DF["standard deviation"], electrode2_DF["difference"]))
 
 # inertias2 = []
-# for i in range(1, len(data2)):
+# for i in range(1, 101):
 #     kmeans = KMeans(n_clusters=i)
 #     kmeans.fit(data2)
 #     inertias2.append(kmeans.inertia_)
 
-# plt.plot(range(1, len(data2)), inertias2, marker="o")
+# plt.plot(range(1, 101), inertias2, marker="o")
 # plt.title("Elbow method")
 # plt.xlabel("Number of clusters")
 # plt.ylabel("Inertia")
@@ -88,6 +89,7 @@ data2 = list(zip(electrode2_DF["standard deviation"], electrode2_DF["difference"
 kmeans2 = KMeans(n_clusters=3)
 kmeans2.fit(data2)
 
+fig, ax = plt.subplots()
 plt.scatter(
     electrode2_DF["standard deviation"], electrode2_DF["difference"], c=kmeans2.labels_
 )
