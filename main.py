@@ -2,13 +2,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from scipy.signal import find_peaks
 
 sampling_rate = 24414
 window_duration = 2e-3
 window_size = int(window_duration * sampling_rate)
+max_peaks_to_plot = 20
+samples_to_consider = 20000
+num_clusters = 3  # Gotten by the elbow method
 
-
-def spike_sorting(list):
+def get_features(list):
     data = []
     threshold = 3.5 * np.std(list[:499])
 
@@ -37,6 +40,23 @@ def spike_sorting(list):
     dataDF = pd.DataFrame(data)
     return dataDF
 
+def spike_sorting(data):
+    threshold = 3.5 * np.std(data[:499])
+    spike_indices, _ = find_peaks(data[:samples_to_consider], height=threshold)
+
+    # Sort spike indices by peak amplitude in descending order
+    sorted_spike_indices = sorted(spike_indices, key=lambda index: data[index], reverse=True)
+
+    selected_spike_indices = sorted_spike_indices[:max_peaks_to_plot]
+
+    spikes = []
+    for index in selected_spike_indices:
+        start_index = int(max(0, index - window_size // 2))
+        end_index = int(min(len(data), index + window_size // 2))
+        spike_waveform = data[start_index:end_index]
+        spikes.append(spike_waveform)
+
+    return selected_spike_indices, spikes
 
 electrode1 = []
 electrode2 = []
@@ -48,50 +68,40 @@ with open("Data.txt", "r") as file:
         electrode1.append(float(data[0]))
         electrode2.append(float(data[1]))
 
-electrode1_DF = spike_sorting(electrode1)
-electrode2_DF = spike_sorting(electrode2)
+electrodes_data = [electrode1, electrode2]
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(12, 8))
 
-data1 = list(zip(electrode1_DF["standard deviation"], electrode1_DF["difference"]))
+for i, electrode_data in enumerate(electrodes_data):
+    spike_indices, _ = spike_sorting(electrode_data)
 
-# inertias1 = []
-# for i in range(1, 101):
-#     kmeans = KMeans(n_clusters=i)
-#     kmeans.fit(data1)
-#     inertias1.append(kmeans.inertia_)
+    # Perform KMeans clustering on the spike indices
+    X = np.array(list(zip(spike_indices, [electrode_data[index] for index in spike_indices])))
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+    cluster_labels = kmeans.fit_predict(X)
 
-# plt.plot(range(1, 101), inertias1, marker="o")
-# plt.title("Elbow method")
-# plt.xlabel("Number of clusters")
-# plt.ylabel("Inertia")
+    # Plot raw data
+    axes[0][i].plot(electrode_data[:samples_to_consider], label=f'Electrode {i + 1} Raw Data')
 
-kmeans1 = KMeans(n_clusters=3)
-kmeans1.fit(data1)
+    # Plot the peaks with different colors for each cluster
+    for cluster_id in range(num_clusters):
+        cluster_indices = np.where(cluster_labels == cluster_id)[0]
+        axes[0][i].plot(X[cluster_indices, 0], X[cluster_indices, 1], '*', markersize=10, label=f'Cluster {cluster_id + 1}')
 
-fig, ax = plt.subplots()
-plt.scatter(
-    electrode1_DF["standard deviation"], electrode1_DF["difference"], c=kmeans1.labels_
-)
+    axes[0][i].set_xlabel('Sample')
+    axes[0][i].set_ylabel('Amplitude')
+    axes[0][i].legend()
+    axes[0][i].set_title(f'Electrode {i + 1} Raw Data with Clusters')
 
 
-data2 = list(zip(electrode2_DF["standard deviation"], electrode2_DF["difference"]))
+for i in range(2):
+    electrode_DF = get_features(electrodes_data[i])
+    data = list(zip(electrode_DF["standard deviation"], electrode_DF["difference"]))
+    kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+    kmeans.fit(data)
+    axes[1][i].scatter(electrode_DF["standard deviation"], electrode_DF["difference"], c=kmeans.labels_)
+    axes[1][i].set_xlabel('Standard Deviation')
+    axes[1][i].set_ylabel('Difference')
+    axes[1][i].set_title(f'Electrode {i + 1} Scatter Plot with Clusters')
 
-# inertias2 = []
-# for i in range(1, 101):
-#     kmeans = KMeans(n_clusters=i)
-#     kmeans.fit(data2)
-#     inertias2.append(kmeans.inertia_)
-
-# plt.plot(range(1, 101), inertias2, marker="o")
-# plt.title("Elbow method")
-# plt.xlabel("Number of clusters")
-# plt.ylabel("Inertia")
-
-kmeans2 = KMeans(n_clusters=3)
-kmeans2.fit(data2)
-
-fig, ax = plt.subplots()
-plt.scatter(
-    electrode2_DF["standard deviation"], electrode2_DF["difference"], c=kmeans2.labels_
-)
-
+plt.tight_layout()
 plt.show()
