@@ -41,10 +41,10 @@ https://github.com/adhamzorkani/Spike-Sorting/
 ## Results
 
 **![](https://lh7-us.googleusercontent.com/qrcu8Z4GpS1NoAoH1VUg-uWgqQFNik8Dd5RVJydgBLhiziQkYWMQzTyrhdQVqo_AHvnijpoPW42ZjXOyP7vCLhBAWP5Gn-BQJ8mtQSBQt3XWNfxXcuT7SdsICZsJmsA9YnoLIA5jKmygak7vhs7HaFw)**
-**![](https://lh7-us.googleusercontent.com/G0V5YnOJN9hHKE8B_mGcxhB9M0LGGnKOgPDLOvFot7SJLozcT9tdIkDBcNNB44x-iVgtjZnrQlrlxErLeTVISx1YoxZmZ4lq08GkLFVAjIbshh4qfVRViKSE7Xfeqy1UfObzS_TLxDpkrJTCGUdiTPU)**
+![Electrode 1](https://github.com/adhamzorkani/Spike-Sorting/assets/70940249/a3d1147c-9a26-46e3-a1b7-a67398344bae)
 **![](https://lh7-us.googleusercontent.com/yzn4MMBXaGcOWbmyLr4R0grstu-U2XAMSbrCsJXQcT4zWk8Sf1QI4Y3KEyMCOVMx2skRIq7jJbkxj-iq0bTe6e2Xp_tXripo5kg9d_YMwSsp8Jv3qplamYwcWd3TmHo9-TubioXLcq3MT_TrzCeAA10)**
 **![](https://lh7-us.googleusercontent.com/xOlk8rHMiQlFGOmDzDBIeK6Veo0ycgNf7iVmCDurvGWWNl6s49KQy4XG8re0FKwSlQYhTI4RmSOHbXNek6vpbUVVvreb7igL6GE96Py_YGRhqdBH-bezUBdmkzfFD2J7wn7xgvSSXKf85KzYdw-bHh4)**
-**![](https://lh7-us.googleusercontent.com/osKI3u_l_d3hykK_rihjZWnTh8pQvU8jAzB_aT-hB-P9nwNq5QelQJ6h8ptHm44ZnadmhPOPyrccsQHphYZXL6BM9lIajbNXhj8PGOHOSXqsWRt6p3hYqM1vQzYocNb5D6bZcKIjk3ecYXFlwPxHiEo)**
+![Electrode 2](https://github.com/adhamzorkani/Spike-Sorting/assets/70940249/57239af4-973c-4da9-9e23-5130618dd48b)
 **![](https://lh7-us.googleusercontent.com/CXIzknO3K0sBvbKEP9NA-URGrJJ1zKTFaT5vGSBfLQDGz9J9rSb9PaeiKfpoSN23SBs1wyJOE4eE2twvAFNHh1c9Sk407g8AZFtS8Q80Yk8xxHLgp5TGWxJOMN9m3ph7HEc8ALxHk3Ar086AwmExrGs)**
 
 
